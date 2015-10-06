@@ -46,7 +46,11 @@
 
 	'use strict';
 
-	var three = __webpack_require__(1);
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _three = __webpack_require__(1);
+
+	var _three2 = _interopRequireDefault(_three);
 
 	console.log('webpack in actiiiooon');
 
