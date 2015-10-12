@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/GioBakradze/arkanoid",
   "dependencies": {
-    "three": "^0.72.0"
+    "three": "^0.72.0",
+    "underscore": "^1.8.3"
   }
 }
