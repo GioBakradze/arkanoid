@@ -11,9 +11,10 @@ function Board() {
     this.board = this.board.map((e, i) => e.map( (e2, i2) => ( (i2 <= -1 + borderWidth || i2 >= e.length - borderWidth) || (i <= -1 + borderWidth || i >= this.board.length - borderWidth) ? 1 : 0 )));
 
     this.borders = [
-        {x: 0, y: boardHeight/2, width: borderWidth, height: boardHeight},
-        {x: (boardWidth - 2*borderWidth)/2, y: borderWidth/2, width: boardWidth - 2*borderWidth , height: borderWidth}
-        // {x: 0 + borderWidth, y: 0, width: boardWidth - 2*borderWidth , height: borderWidth}
+        {x: -1* (boardWidth/2), y: 0, width: borderWidth, height: boardHeight},
+        {x: 0, y: -1*(boardHeight/2), width: boardWidth, height: borderWidth},
+        {x: 0, y: boardHeight/2, width: boardWidth, height: borderWidth},
+        {x: boardWidth/2, y: 0, width: borderWidth, height: boardHeight},
     ];
 }
 
