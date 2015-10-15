@@ -35,12 +35,12 @@ function View(b) {
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
     this.camera.position.x = 0;
     this.camera.position.y = 0;
-    this.camera.position.z = 200;
+    this.camera.position.z = 150;
     this.scene.add(this.camera);
 
     this.dropBlocks(b.borders, 0x00afff);
     this.dropBlocks(b.blocks, 0xf0676f);
-    this.dropBlocks(b.user, 0x1ec876);
+    this.userPad = (this.dropBlocks(b.user, 0x1ec876))[0];
     this.dropBlocks(b.ball, 0xEFD76F);
 
     // ########################################
@@ -71,6 +71,7 @@ function View(b) {
 }
 
 View.prototype.dropBlocks = function(array, color) {
+    var res = [];
     for (let i in array) {
         var b = array[i];
         var geometry = new THREE.BoxGeometry(b.width, b.height, 1);
@@ -82,7 +83,15 @@ View.prototype.dropBlocks = function(array, color) {
         cube.position.y = b.y;
         cube.position.z = 0;
         this.scene.add(cube);
+        res.push(cube);
     }
+    return res;
+};
+
+View.prototype.updateUserPad = function () {
+    this.userPad.position.x = board.user[0].x;
 };
 
 var view = new View(board);
+
+export default view;
