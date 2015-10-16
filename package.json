@@ -29,6 +29,7 @@
   "homepage": "https://github.com/GioBakradze/arkanoid",
   "dependencies": {
     "three": "^0.72.0",
+    "tween.js": "^16.3.1",
     "underscore": "^1.8.3"
   }
 }

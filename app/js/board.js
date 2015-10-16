@@ -1,3 +1,5 @@
+import SimpleMath from './simpleMath';
+
 function Board() {
 
     var boardHeight = 100;
@@ -6,9 +8,7 @@ function Board() {
     var blocksRow = 5;
     var blocksCol = 10;
 
-    // this.board = Array.apply(null, Array(boardHeight)).map(() => Array.apply(null, Array(boardWidth)).map(() => 0));
-    // create borders
-    // this.board = this.board.map((e, i) => e.map( (e2, i2) => ( (i2 <= -1 + borderWidth || i2 >= e.length - borderWidth) || (i <= -1 + borderWidth || i >= this.board.length - borderWidth) ? 1 : 0 )));
+    this.boardHeight = boardHeight;
 
     // the block size is 5x2 space between
     // blocks is 2 units, keep that in mind, also border is 2 units
@@ -49,6 +49,12 @@ function Board() {
 
     this.leftSide = -1* (boardWidth/2);
     this.rightSide = boardWidth/2;
+
+    this.ballRightSide = this.rightSide - 2.5;
+    this.ballLeftSide = this.leftSide + 2.5;
+
+    // game flow variables
+    this.angle = Math.floor(Math.random() * 45) + 30; // get starting angle randomly between 30 and 45 degrees
 }
 
 Board.prototype.movePadLeft = function () {
@@ -59,6 +65,27 @@ Board.prototype.movePadLeft = function () {
 Board.prototype.movePadRight = function () {
     var curX = this.user[0].x;
     this.user[0].x = curX + 2 <= this.rightSide - 5 - 1 ? curX + 2 : curX;
+};
+
+Board.prototype.getNextMove = function () {
+
+    var x = (this.ball[0].x === this.ballLeftSide) ? this.ballRightSide : this.ballLeftSide;
+
+    var currentAngle = 90 - this.angle;
+    // currentAngle = x < this.ball[0].x ? 180 - currentAngle : currentAngle;
+    this.angle = currentAngle;
+    currentAngle = x < this.ball[0].x ? 90 +  currentAngle : currentAngle;
+
+    currentAngle = Math.tan(SimpleMath.toRadians(currentAngle));
+
+    // remember y = kx + b from 6th grade?
+    var y = x * currentAngle + (-1*(this.boardHeight/2) + 5.5);
+
+    console.log(this.ball[0].x, this.ballLeftSide, y);
+
+    this.ball[0].x = x;
+    this.ball[0].y = y;
+    return {x: x, y: y};
 };
 
 var gameBoard = new Board();

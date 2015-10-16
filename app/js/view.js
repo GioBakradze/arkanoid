@@ -1,5 +1,6 @@
 import THREE from 'three';
 import board from './board';
+import TWEEN from 'tween.js';
 
 function View(b) {
     this.width = window.innerWidth;
@@ -41,7 +42,7 @@ function View(b) {
     this.dropBlocks(b.borders, 0x00afff);
     this.dropBlocks(b.blocks, 0xf0676f);
     this.userPad = (this.dropBlocks(b.user, 0x1ec876))[0];
-    this.dropBlocks(b.ball, 0xEFD76F);
+    this.ball = (this.dropBlocks(b.ball, 0xEFD76F))[0];
 
     // ########################################
     // some random events
@@ -55,6 +56,7 @@ function View(b) {
         this.camera.position.x = posX;
         this.camera.position.y = pos;
         this.camera.lookAt(this.center);
+        TWEEN.update();
         window.requestAnimationFrame(render.bind(this));
     }
 
@@ -90,6 +92,12 @@ View.prototype.dropBlocks = function(array, color) {
 
 View.prototype.updateUserPad = function () {
     this.userPad.position.x = board.user[0].x;
+};
+
+View.prototype.updateBall = function (moveTo) {
+    var target = { x : moveTo.x, y: moveTo.y };
+    var tween = new TWEEN.Tween(this.ball.position).to(target, 1000);
+    tween.start();
 };
 
 var view = new View(board);
