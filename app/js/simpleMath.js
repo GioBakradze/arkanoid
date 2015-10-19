@@ -12,63 +12,67 @@ function getF(k, b) {
     };
 }
 
-var linear = {
-    getSlope: function(x1, y1, x2, y2) {
-        if (x1 == x2) return false;
-        return (y1 - y2) / (x1 - x2);
-    },
-    getYInt: function(x1, y1, x2, y2) {
-        if (x1 === x2) return y1 === 0 ? 0 : false;
-        if (y1 === y2) return y1;
-        return y1 - this.getSlope(x1, y1, x2, y2) * x1;
-    },
-    getXInt: function(x1, y1, x2, y2) {
-        var slope;
-        if (y1 === y2) return x1 === 0 ? 0 : false;
-        if (x1 === x2) return x1;
-        return (-1 * ((slope = this.getSlope(x1, y1, x2, y2)) * x1 - y1)) / slope;
-    },
-    getInt: function(x11, y11, x12, y12, x21, y21, x22, y22) {
-        var slope1, slope2, yint1, yint2, intx, inty;
-
-        // check if either of the points are the same. if so that's our intersection
-        if (x11 == x21 && y11 == y21) return [x11, y11];
-        if (x12 == x22 && y12 == y22) return [x12, y22];
-
-        // get slope: (y1 - y1) / (x1 - x2)
-        slope1 = this.getSlope(x11, y11, x12, y12);
-        slope2 = this.getSlope(x21, y21, x22, y22);
-
-        // if both lines have the same slope, they are paralell; never touch.
-        if (slope1 === slope2) return false;
-
-        // get y-intersection: y - slope * x
-        yint1 = this.getYInt(x11, y11, x12, y12);
-        yint2 = this.getYInt(x21, y21, x22, y22);
-
-        // check to see if both lines have the same yintcept, and if so, return the point
-        if (yint1 === yint2) return yint1 === false ? false : [0, yint1];
-
-        // if one of the lines doesn't have a slope:
-        if (slope1 === false) return [x21, slope2 * x21 + yint2];
-        if (slope2 === false) return [x11, slope1 * x11 + yint1];
-
-        //if both lines have a slop and y intercept, calulate the x-intercept:
-        // (slope1 * x1 + yint1 - yint2) / slope2;
-        intx = (slope1 * x11 + yint1 - yint2) / slope2;
-
-        // calculate the y-intercept, and return an array:
-        return [intx, slope1 * intx + yint1];
+// some random code from google
+function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
+    // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+    var denominator, a, b, numerator1, numerator2, result = {
+        x: null,
+        y: null,
+        onLine1: false,
+        onLine2: false
+    };
+    denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - ((line2EndX - line2StartX) * (line1EndY - line1StartY));
+    if (denominator === 0) {
+        return result;
     }
-};
+    a = line1StartY - line2StartY;
+    b = line1StartX - line2StartX;
+    numerator1 = ((line2EndX - line2StartX) * a) - ((line2EndY - line2StartY) * b);
+    numerator2 = ((line1EndX - line1StartX) * a) - ((line1EndY - line1StartY) * b);
+    a = numerator1 / denominator;
+    b = numerator2 / denominator;
+
+
+    // if we cast these lines infinitely in both directions, they intersect here:
+    result.x = line1StartX + (a * (line1EndX - line1StartX));
+    result.y = line1StartY + (a * (line1EndY - line1StartY));
+    /*
+            // it is worth noting that this should be the same as:
+            x = line2StartX + (b * (line2EndX - line2StartX));
+            y = line2StartX + (b * (line2EndY - line2StartY));
+            */
+    // if line1 is a segment and line2 is infinite, they intersect if:
+    if (a >= 0 && a <= 1) {
+        result.onLine1 = true;
+    }
+    // if line2 is a segment and line1 is infinite, they intersect if:
+    if (b >= 0 && b <= 1) {
+        result.onLine2 = true;
+    }
+    // if line1 and line2 are segments, they intersect if both of the above are true
+    return result;
+}
 
 function getIntersection(a, b, c, d) {
-    return linear.getInt(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
+    var res = checkLineIntersection(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
+    if (res.onLine1 && res.onLine2) {
+        return {
+            x: res.x,
+            y: res.y
+        };
+    }
+
+    return false;
+}
+
+function getRandomBetween(min, max) {
+    return Math.random() * (max - min) + min;
 }
 
 export default {
     toRadians: toRadians,
     distance: distance,
     getIntersection: getIntersection,
-    getF: getF
+    getF: getF,
+    getRandomBetween: getRandomBetween
 };

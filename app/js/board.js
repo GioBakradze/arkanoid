@@ -82,17 +82,17 @@ function Board() {
     this.ballCollisionSegments = [
         // vertical line segments
         [{
-            x: this.leftSide + this.halfBall,
+            x: this.rightSide - this.halfBall,
             y: this.bottomSide + this.halfBall
         }, {
-            x: this.leftSide + this.halfBall,
+            x: this.rightSide - this.halfBall,
             y: this.topSide - this.halfBall
         }],
         [{
-            x: this.rightSide - this.halfBall,
+            x: this.leftSide + this.halfBall,
             y: this.bottomSide + this.halfBall
         }, {
-            x: this.rightSide - this.halfBall,
+            x: this.leftSide + this.halfBall,
             y: this.topSide - this.halfBall
         }],
 
@@ -114,18 +114,36 @@ function Board() {
     ];
 
     // game flow variables
-    this.angle = Math.floor(Math.random() * 45) + 30; // get starting angle randomly between 30 and 45 degrees
+    this.angle = SimpleMath.getRandomBetween(10, 45); // get starting angle randomly between 30 and 30 degrees
     this.moveCount = 1;
 }
 
+Board.prototype.restartCycle = function(argument) {
+    this.angle = SimpleMath.getRandomBetween(10, 45);
+    this.moveCount = 1;
+};
+
 Board.prototype.movePadLeft = function() {
     var curX = this.user[0].x;
-    this.user[0].x = curX - 2 >= this.leftSide + 5 + 1 ? curX - 2 : curX;
+    this.user[0].x = curX - 5 >= this.leftSide + 5 + 1 ? curX - 5 : curX;
 };
 
 Board.prototype.movePadRight = function() {
     var curX = this.user[0].x;
-    this.user[0].x = curX + 2 <= this.rightSide - 5 - 1 ? curX + 2 : curX;
+    this.user[0].x = curX + 5 <= this.rightSide - 5 - 1 ? curX + 5 : curX;
+};
+
+Board.prototype.checkUserCollision = function(x, y) {
+
+    var padXLeft = this.user[0].x - 5 - 1;
+    var padXRight = this.user[0].x + 5 + 1;
+    var padYTop = this.user[0].y + 1 + 1;
+    var padYBottom = this.user[0].y - 1 - 1;
+
+    if (x >= padXLeft && x <= padXRight && y >= padYBottom && y <= padYTop) {
+        return true;
+    }
+    return false;
 };
 
 Board.prototype.getNextMove = function() {
@@ -138,6 +156,7 @@ Board.prototype.getNextMove = function() {
 
     // generate some large segment
     var currentAngle = !(this.moveCount & 1) ? 180 - this.angle : this.angle;
+    console.log('angle', currentAngle);
     currentAngle = Math.tan(SimpleMath.toRadians(currentAngle));
 
     var f = SimpleMath.getF(currentAngle, currentY);
@@ -152,31 +171,29 @@ Board.prototype.getNextMove = function() {
         }
     };
 
-    var x = (currentX === this.ballRightSide) ? this.ballLeftSide : this.ballRightSide;
-    var y = f(x);
-
     // check for collisions
     var minDistance = 9999999;
-    _.each(this.ballCollisionSegments, function(e) {
-        var intersection = SimpleMath.getIntersection(segment.a, segment.b, e[0], e[1]);
+    _.each(this.ballCollisionSegments, e => {
+        if ( !(this.moveCount == 1 && minDistance != 9999999) ) {
+            var intersection = SimpleMath.getIntersection(segment.a, segment.b, e[0], e[1]);
 
-        console.log('i e', intersection, e);
+            // console.log('i e', intersection, e);
 
-        if ( !!intersection && intersection[0] != currentX && intersection[1] != currentY) {
-            var dist = SimpleMath.distance({x: currentX, y: currentY}, {x: intersection[0], y: intersection[1] });
-            // console.log('d', dist);
-            if (dist < minDistance) {
-                minDistance = dist;
-                destX = intersection[0];
-                destY = intersection[1];
+            if (!!intersection && intersection.x != currentX && intersection.y != currentY) {
+                var dist = SimpleMath.distance({
+                    x: currentX,
+                    y: currentY
+                }, intersection);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    destX = intersection.x;
+                    destY = intersection.y;
+                }
             }
         }
     });
 
-    console.log('s', segment);
-    console.log('x', x, destX);
-    console.log('y', y, destY);
-
+    // console.log(destX, destY);
     this.moveCount++;
     this.ball[0].x = destX;
     this.ball[0].y = destY;

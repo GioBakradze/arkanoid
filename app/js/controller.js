@@ -2,6 +2,24 @@ import view from './view';
 import board from './board';
 
 var gameStarted = false;
+var gameInterval;
+
+function collisionCheck(x, y) {
+    if (board.checkUserCollision(x, y)) {
+        // console.log('hit', board.checkUserCollision(x, y));
+        clearInterval(gameInterval);
+        view.cancelTween();
+        initGame();
+    }
+}
+
+function initGame() {
+    board.restartCycle();
+    view.updateBall(board.getNextMove(), collisionCheck);
+    gameInterval = setInterval(function() {
+        view.updateBall(board.getNextMove(), collisionCheck);
+    }, 1000);
+}
 
 function keypress(e) {
     var code = (typeof e.which == 'number') ? (e.which === 0 ? e.keyCode : e.which) : e.keyCode;
@@ -9,13 +27,7 @@ function keypress(e) {
     // space
     if (code == 32 && !gameStarted) {
         gameStarted = true;
-
-        // console.log(Math.floor(Math.random() * 10));
-        view.updateBall(board.getNextMove());
-
-        setInterval(function () {
-            view.updateBall(board.getNextMove());
-        }, 1000);
+        initGame();
     }
 }
 

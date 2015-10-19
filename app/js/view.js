@@ -94,10 +94,19 @@ View.prototype.updateUserPad = function () {
     this.userPad.position.x = board.user[0].x;
 };
 
-View.prototype.updateBall = function (moveTo) {
+View.prototype.updateBall = function (moveTo, updated) {
     var target = { x : moveTo.x, y: moveTo.y };
-    var tween = new TWEEN.Tween(this.ball.position).to(target, 1000);
-    tween.start();
+    this.tween = new TWEEN.Tween(this.ball.position).to(target, 1000);
+
+    this.tween.onUpdate(function () {
+        updated(this.x, this.y);
+    });
+
+    this.tween.start();
+};
+
+View.prototype.cancelTween = function () {
+    this.tween.stop();
 };
 
 var view = new View(board);
