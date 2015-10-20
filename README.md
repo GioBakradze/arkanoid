@@ -24,4 +24,4 @@ And then
 npm run server
 ```
 
-Head to localhost:8080 (or something like this) and you see this wonderful game
+Head to localhost:8080 (or something like this) and enjoy this wonderful game
