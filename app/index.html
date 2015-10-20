@@ -7,6 +7,7 @@
         body, html {
             margin: 0;
             padding: 0;
+            position: relative;
         }
 
         canvas {
@@ -15,10 +16,23 @@
             left: 0;
             background: #eaeae9;
         }
+
+        span {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 999;
+            font-family: Arial;
+        }
+
+        span b {
+            color: red;
+        }
     </style>
 </head>
 
 <body>
+    <span>press <b>space</b> to start</span>
     <script src="bundle.js" charset="utf-8"></script>
 </body>
 </html>

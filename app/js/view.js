@@ -20,7 +20,7 @@ function View(b) {
     // ########################################
     // create point light like a light bulb
     this.light = new THREE.PointLight(0xffffff);
-    this.light.position.set( 50, 50, 250 );
+    this.light.position.set( 350, 350, 250 );
     this.scene.add(this.light);
 
     // ########################################
@@ -60,23 +60,31 @@ function View(b) {
     }
     var that = this;
     new TWEEN.Tween({z: 0}).to({z: 200}, 2000).easing(TWEEN.Easing.Quadratic.Out).onUpdate(function () {
-        console.log(this.z);
         that.camera.position.z = this.z;
         that.camera.lookAt(that.center);
+    }).onComplete(function (argument) {
+        // run light tween here
+        new TWEEN.Tween({x: 350, y: 350, z: 250}).to({x: 50, y: 50, z: 250}, 1000).onUpdate(function () {
+            that.light.position.set( this.x, this.y, this.z);
+        }).start();
     }).start();
 
-    //
-    // var next = null;
-    // document.addEventListener('mousemove', function(e) {
-    //     if (!!next) {
-    //         pos = e.clientX - next > 0 ? pos + 1 : pos - 1;
-    //         posX = e.clientX - next > 0 ? pos + 1 : pos - 1;
-    //     }
-    //     next = e.clientX;
-    // }, false);
-
     render.bind(this)();
+    this.prevClientX = undefined;
 }
+
+View.prototype.rotateBoard = function(clientX) {
+    // if (!_.isUndefined(this.prevClientX)) {
+    //     if (clientX - this.prevClientX > 0 && this.camera.rotation.y <= 0.5) {
+    //         this.camera.rotation.y += 0.005;
+    //     } else {
+    //         if (this.camera.rotation.y >= -0.5) {
+    //             this.camera.rotation.y -= 0.005;
+    //         }
+    //     }
+    // }
+    // this.prevClientX = clientX;
+};
 
 View.prototype.dropBlocks = function(array, color) {
     var res = [];

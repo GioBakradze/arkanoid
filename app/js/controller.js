@@ -16,6 +16,10 @@ board.blockKilled = function(i) {
     }, 1000);
 };
 
+function mousemove(e) {
+    view.rotateBoard(e.clientX);
+}
+
 function updated(x, y) {
     // check for pad collision
     if (board.checkUserCollision(x, y)) {
@@ -74,6 +78,7 @@ function init() {
     // setup listeners
     document.addEventListener('keypress', keypress);
     document.addEventListener('keydown', keydown);
+    document.addEventListener('mousemove', mousemove);
 }
 
 export default {
