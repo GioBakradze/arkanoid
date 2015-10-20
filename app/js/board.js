@@ -113,14 +113,48 @@ function Board() {
         }]
     ];
 
+    _.each(this.blocks, (e,i) => {
+        this.ballCollisionSegments.push([{
+            x: e.x - 2.5 - this.halfBall,
+            y: e.y - 1,
+            blockIndex: i
+        }, {
+            x: e.x + 2.5 + this.halfBall,
+            y: e.y - 1,
+            blockIndex: i
+        }]);
+
+        this.ballCollisionSegments.push([{
+            x: e.x - 2.5 - this.halfBall,
+            y: e.y + 1,
+            blockIndex: i
+        }, {
+            x: e.x - 2.5 - this.halfBall,
+            y: e.y - 1,
+            blockIndex: i
+        }]);
+
+        this.ballCollisionSegments.push([{
+            x: e.x + 2.5 + this.halfBall,
+            y: e.y + 1,
+            blockIndex: i
+        }, {
+            x: e.x + 2.5 + this.halfBall,
+            y: e.y - 1,
+            blockIndex: i
+        }]);
+    });
+
     // game flow variables
-    this.angle = SimpleMath.getRandomBetween(10, 45); // get starting angle randomly between 30 and 30 degrees
+    this.angle = SimpleMath.getRandomBetween(30, 35);
     this.moveCount = 1;
+    this.directionUp = true;
 }
 
 Board.prototype.restartCycle = function(argument) {
-    this.angle = SimpleMath.getRandomBetween(10, 45);
+    this.angle = SimpleMath.getRandomBetween(30, 35);
     this.moveCount = 1;
+    this.directionUp = true;
 };
 
 Board.prototype.movePadLeft = function() {
@@ -135,14 +169,19 @@ Board.prototype.movePadRight = function() {
 
 Board.prototype.checkUserCollision = function(x, y) {
 
-    var padXLeft = this.user[0].x - 5 - 1;
-    var padXRight = this.user[0].x + 5 + 1;
+    var padXLeft = this.user[0].x - 5 - 1 - this.halfBall;
+    var padXRight = this.user[0].x + 5 + 1 + this.halfBall;
     var padYTop = this.user[0].y + 1 + 1;
     var padYBottom = this.user[0].y - 1 - 1;
 
     if (x >= padXLeft && x <= padXRight && y >= padYBottom && y <= padYTop) {
         return true;
     }
+    return false;
+};
+
+Board.prototype.checkLooseCondition = function(x, y) {
+    if (y === (this.bottomSide + this.halfBall)) return true;
     return false;
 };
 
@@ -156,7 +195,7 @@ Board.prototype.getNextMove = function() {
 
     // generate some large segment
     var currentAngle = !(this.moveCount & 1) ? 180 - this.angle : this.angle;
-    console.log('angle', currentAngle);
+    // console.log('angle', currentAngle);
     currentAngle = Math.tan(SimpleMath.toRadians(currentAngle));
 
     var f = SimpleMath.getF(currentAngle, currentY);
@@ -172,31 +211,62 @@ Board.prototype.getNextMove = function() {
     };
 
     // check for collisions
+    var yCollision = false;
     var minDistance = 9999999;
     _.each(this.ballCollisionSegments, e => {
-        if ( !(this.moveCount == 1 && minDistance != 9999999) ) {
-            var intersection = SimpleMath.getIntersection(segment.a, segment.b, e[0], e[1]);
+        var intersection = SimpleMath.getIntersection(segment.a, segment.b, e[0], e[1]);
 
-            // console.log('i e', intersection, e);
 
-            if (!!intersection && intersection.x != currentX && intersection.y != currentY) {
+        if (intersection !== false && intersection.x != currentX && intersection.y != currentY) {
+            if (this.directionUp && intersection.y >= currentY || !this.directionUp && intersection.y <= currentY) {
+
                 var dist = SimpleMath.distance({
                     x: currentX,
                     y: currentY
                 }, intersection);
+
                 if (dist < minDistance) {
                     minDistance = dist;
                     destX = intersection.x;
                     destY = intersection.y;
+
+
+                    if (e[0].hasOwnProperty('blockIndex')) {
+                        // console.log(e[0].blockIndex);
+
+                        this.ballCollisionSegments = _.filter(this.ballCollisionSegments, e2 => {
+                            if (e2[0].hasOwnProperty('blockIndex') && e2[0].blockIndex == e[0].blockIndex) return false;
+                            return true;
+                        });
+
+                        if (this.hasOwnProperty('blockKilled')) {
+                            this.blockKilled(e[0].blockIndex);
+                        }
+                    }
+
+                    // console.log(e[1].y, destY);
+
+                    if (e[0].y === e[1].y && ( destY <= e[1].y+1 && destY >= e[1].y-1 )) {
+                        yCollision = true;
+                    } else {
+                        yCollision = false;
+                    }
                 }
+
             }
         }
+
     });
 
-    // console.log(destX, destY);
+    if (yCollision) {
+        this.directionUp = !this.directionUp;
+    }
+
     this.moveCount++;
-    this.ball[0].x = destX;
-    this.ball[0].y = destY;
+    // this.ball[0].x = destX;
+    // this.ball[0].y = destY;
+
+    // console.log(destX, destY);
     return {
         x: destX,
         y: destY

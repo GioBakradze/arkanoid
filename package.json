@@ -15,7 +15,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack -w",
-    "server": "cd app && http-server"
+    "server": "cd app && http-server",
+    "build": "webpack"
   },
   "repository": {
     "type": "git",

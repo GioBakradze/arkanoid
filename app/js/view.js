@@ -1,6 +1,7 @@
 import THREE from 'three';
 import board from './board';
 import TWEEN from 'tween.js';
+import _ from 'underscore';
 
 function View(b) {
     this.width = window.innerWidth;
@@ -36,11 +37,11 @@ function View(b) {
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
     this.camera.position.x = 0;
     this.camera.position.y = 0;
-    this.camera.position.z = 150;
+    this.camera.position.z = 0;
     this.scene.add(this.camera);
 
     this.dropBlocks(b.borders, 0x00afff);
-    this.dropBlocks(b.blocks, 0xf0676f);
+    this.blocks = this.dropBlocks(b.blocks, 0xf0676f);
     this.userPad = (this.dropBlocks(b.user, 0x1ec876))[0];
     this.ball = (this.dropBlocks(b.ball, 0xEFD76F))[0];
 
@@ -53,21 +54,26 @@ function View(b) {
 
     function render() {
         this.renderer.render(this.scene, this.camera);
-        this.camera.position.x = posX;
-        this.camera.position.y = pos;
-        this.camera.lookAt(this.center);
+
         TWEEN.update();
         window.requestAnimationFrame(render.bind(this));
     }
+    var that = this;
+    new TWEEN.Tween({z: 0}).to({z: 200}, 2000).easing(TWEEN.Easing.Quadratic.Out).onUpdate(function () {
+        console.log(this.z);
+        that.camera.position.z = this.z;
+        that.camera.lookAt(that.center);
+    }).start();
 
-    var next = null;
-    document.addEventListener('mousemove', function(e) {
-        if (!!next) {
-            pos = e.clientX - next > 0 ? pos + 1 : pos - 1;
-            posX = e.clientX - next > 0 ? pos + 1 : pos - 1;
-        }
-        next = e.clientX;
-    }, false);
+    //
+    // var next = null;
+    // document.addEventListener('mousemove', function(e) {
+    //     if (!!next) {
+    //         pos = e.clientX - next > 0 ? pos + 1 : pos - 1;
+    //         posX = e.clientX - next > 0 ? pos + 1 : pos - 1;
+    //     }
+    //     next = e.clientX;
+    // }, false);
 
     render.bind(this)();
 }
@@ -96,9 +102,20 @@ View.prototype.updateUserPad = function () {
 
 View.prototype.updateBall = function (moveTo, updated) {
     var target = { x : moveTo.x, y: moveTo.y };
-    this.tween = new TWEEN.Tween(this.ball.position).to(target, 1000);
+    var start = {
+        x: this.ball.position.x,
+        y: this.ball.position.y
+    };
+    var that = this;
+    this.tween = new TWEEN.Tween(start).to(target, 1000);
 
     this.tween.onUpdate(function () {
+        if (!_.isUndefined(this.x) && !_.isUndefined(this.y)) {
+            that.ball.position.x = this.x;
+            that.ball.position.y = this.y;
+            board.ball[0].x = this.x;
+            board.ball[0].y = this.y;
+        }
         updated(this.x, this.y);
     });
 
@@ -107,6 +124,14 @@ View.prototype.updateBall = function (moveTo, updated) {
 
 View.prototype.cancelTween = function () {
     this.tween.stop();
+};
+
+View.prototype.removeBlock = function (index) {
+    _.each(this.blocks, (e, i) => {
+        if (index == i) {
+            this.scene.remove(e);
+        }
+    });
 };
 
 var view = new View(board);
